@@ -24,16 +24,52 @@ public class ListaClientes {
 		}
 	}
 	
-	public void mostraLista() {
-		if(inicio == null)
-			System.out.println("Nenhum cliente cadastrado.");
-		else {
+	public int mostrarLista() {
+		if(inicio == null) {
+			System.out.println("Nenhum cliente foi cadastrado.\n");
+			return 0;
+		} else {
 			Cliente aux = inicio;
 			int cont = 0;
 			while(aux != null) {
+				cont++;
 				System.out.println(cont + ". " + aux.getNome());
 				aux = aux.getProx();
 			}
+			System.out.println();
+			return cont;
+		}
+	}
+	
+	public Cliente pesquisarCliente(int posicao) {
+		Cliente aux = inicio;
+		for(int i = 1; i < posicao; i++)
+			aux = aux.getProx();
+		return aux;
+	}
+	
+	public void remover(int posicao) {
+		if(posicao == 1)
+			inicio = inicio.getProx();
+		else{
+			Cliente aux = inicio;
+			for(int i = 2; i < posicao; i++)
+				aux = aux.getProx();
+			aux.setProx(aux.getProx().getProx());
+		}
+	}
+	
+	public void atualizar(int posicao, String nome) {
+		Cliente clienteAtualizado = new Cliente(nome);
+		if(posicao == 1) {
+			clienteAtualizado.setProx(inicio.getProx());
+			inicio = clienteAtualizado;
+		} else {
+			Cliente aux = inicio;
+			for(int i = 2; i < posicao; i++)
+				aux = aux.getProx();
+			clienteAtualizado.setProx(aux.getProx().getProx());
+			aux.setProx(clienteAtualizado);
 		}
 	}
 	
