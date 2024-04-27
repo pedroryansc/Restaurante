@@ -41,7 +41,7 @@ public class ListaMesas {
 					System.out.print("Disponível)");
 				System.out.print(" | Capacidade: " + aux.getCapacidade() + " pessoa(s)");
 				if(!(aux.foiAtendida()))
-					System.out.println(" - Não atendida");
+					System.out.println(" - Não atendida" + aux.getInicio());
 				else
 					System.out.println();
 				aux = aux.getProx();
@@ -88,7 +88,7 @@ public class ListaMesas {
 	
 	public int mostrarOcupadas() {
 		if(inicio == null) {
-			System.out.println("Nenhuma mesa foi cadastrada.\n");
+			System.out.println("Nenhuma mesa foi cadastrada.");
 			return -1;
 		} else {
 			Mesa aux = inicio;
@@ -105,7 +105,7 @@ public class ListaMesas {
 				aux = aux.getProx();
 			}
 			if(idMesa == 0)
-				System.out.println("Todas as mesas estão disponíveis.\n");
+				System.out.println("Todas as mesas estão disponíveis.");
 			return idMesa;
 		}
 	}
@@ -123,7 +123,8 @@ public class ListaMesas {
 		return false;
 	}
 	
-	public boolean adicionarCliente(int idMesa, Cliente cliente) {
+	public boolean adicionarCliente(int idMesa, String nome) {
+		Cliente cliente = new Cliente(nome);
 		Mesa aux = inicio;
 		while(aux != null) {
 			if(aux.getId() == idMesa) {
@@ -134,21 +135,21 @@ public class ListaMesas {
 		return false;
 	}
 	
-	public int liberarMesa(int id) {
-		if(inicio == null) {
-			System.out.println("Nenhuma mesa foi cadastrada");
-			return -1;
-		} else {
+	public boolean liberarMesa(int id) {
+		if(id == 0)
+			return true;
+		else {
 			Mesa aux = inicio;
 			while(aux != null) {
-				if(aux.getId() == id) {
+				if(aux.getId() == id && aux.estaOcupada()) {
+					aux.setInicio(null);
 					aux.setAtendida(true);
 					aux.setCadeirasOcupadas(0);
-					return 1;
+					return true;
 				}
 				aux = aux.getProx();
 			}
-			return 0;
+			return false;
 		}
 	}
 	

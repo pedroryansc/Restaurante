@@ -28,11 +28,11 @@ public class Mesa {
 		} else {
 			Cliente aux = inicio;
 			while(aux.getProx() != null) {
-				if(aux == cliente)
+				if(aux.getNome() == cliente.getNome())
 					return false;
 				aux = aux.getProx();
 			}
-			if(aux == cliente)
+			if(aux.getNome() == cliente.getNome())
 				return false;
 			else {
 				aux.setProx(cliente);
@@ -53,6 +53,10 @@ public class Mesa {
 
 	public Cliente getInicio() {
 		return inicio;
+	}
+	
+	public void setInicio(Cliente inicio) {
+		this.inicio = inicio;
 	}
 	
 	public int getId() {

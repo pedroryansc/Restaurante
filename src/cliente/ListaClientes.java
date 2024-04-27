@@ -42,10 +42,13 @@ public class ListaClientes {
 	}
 	
 	public Cliente pesquisarCliente(int posicao) {
-		Cliente aux = inicio;
-		for(int i = 1; i < posicao; i++)
-			aux = aux.getProx();
-		return aux;
+		if(posicao > 0) {
+			Cliente aux = inicio;
+			for(int i = 1; i < posicao; i++)
+				aux = aux.getProx();
+			return aux;
+		} else
+			return null;
 	}
 	
 	public void remover(int posicao) {
@@ -70,6 +73,20 @@ public class ListaClientes {
 				aux = aux.getProx();
 			clienteAtualizado.setProx(aux.getProx().getProx());
 			aux.setProx(clienteAtualizado);
+		}
+	}
+	
+	public int contarClientes() {
+		if(inicio == null)
+			return 0;
+		else {
+			Cliente aux = inicio;
+			int cont = 0;
+			while(aux != null) {
+				cont++;
+				aux = aux.getProx();
+			}
+			return cont;
 		}
 	}
 	
