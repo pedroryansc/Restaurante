@@ -315,18 +315,21 @@ public class Main {
 									for(int i = 1; i <= quantPessoas; i++) {
 										
 										int contClientes = clientes.mostrarLista();
+										Cliente cliente;
 										
 										do {
 											System.out.println("Quem é a " + i + "ª pessoa da mesa?");
 											posicao = entrada.nextInt();
-											Cliente cliente = clientes.pesquisarCliente(posicao);
-											if(posicao > 0 && posicao <= clientes.contarClientes())
+											cliente = clientes.pesquisarCliente(posicao);
+											if(posicao > 0 && posicao <= clientes.contarClientes()) {
 												adicionar = mesas.adicionarCliente(idMesa, cliente.getNome());
-											if(posicao < 1 || posicao > contClientes)
+												if(!(adicionar))
+													System.out.println("\nErro: Cliente " + cliente.getNome() + " já inserido\n");
+											} else
 												System.out.println("\nErro: Opção inválida\n");
-											if(!(adicionar))
-												System.out.println("\nErro: Cliente " + cliente.getNome() + " já inserido\n");
 										} while(posicao < 1 || posicao > contClientes || !(adicionar));
+										
+										System.out.println("\nCliente " + cliente.getNome() + " adicionado com sucesso.");
 										
 										System.out.println();
 									}

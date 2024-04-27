@@ -42,7 +42,7 @@ public class ListaClientes {
 	}
 	
 	public Cliente pesquisarCliente(int posicao) {
-		if(posicao > 0) {
+		if(posicao > 0 && posicao <= contarClientes()) {
 			Cliente aux = inicio;
 			for(int i = 1; i < posicao; i++)
 				aux = aux.getProx();
