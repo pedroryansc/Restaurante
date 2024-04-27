@@ -3,13 +3,21 @@ package main;
 import java.util.Scanner;
 
 import cliente.*;
+import mesa.ListaMesas;
 
 public class Main {
 	public static void main(String[] args) {
 		
 		Scanner entrada = new Scanner(System.in);
 		
+		// Criação das listas
+		
 		ListaClientes clientes = new ListaClientes();
+		ListaMesas mesas = new ListaMesas();
+		
+		// Inicialização das variáveis de estatística
+		
+		int filaParaSentar = 0;
 		
 		int sistema = 1;
 		
@@ -35,9 +43,10 @@ public class Main {
 			
 			System.out.println();
 			
-			// Seção "Clientes"
-			
 			if(sistema == 1) {
+				
+				// Seção "Clientes"
+				
 				int escolha = -1;
 				
 				while(escolha != 0) {
@@ -170,6 +179,10 @@ public class Main {
 									System.out.println("Remoção cancelada.");
 									remover = -1;
 								}
+							} else {
+								System.out.println("Insira qualquer tecla para voltar:");
+								entrada.nextLine();
+								entrada.nextLine();
 							}
 						} while(remover == 0);
 						
@@ -177,16 +190,146 @@ public class Main {
 					}
 				}
 			} else if(sistema == 3) {
+				
+				// Seção "Mesas"
+				
 				int escolha = -1;
 				
 				while(escolha != 0) {
 					System.out.println("Mesas\n");
 					
 					do {
-						System.out.println("Você quer alocar uma mesa?");
-						System.out.println("(1) Sim");
+						System.out.println("O que você gostaria de fazer?");
+						System.out.println("(1) Cadastrar mesa");
+						System.out.println("(2) Consultar mesas ocupadas e disponíveis");
+						System.out.println("(3) Ocupar mesa");
+						System.out.println("(4) Liberar mesa");
 						System.out.println("(0) Voltar");
-					} while(escolha < 0 || escolha > 1);
+						escolha = entrada.nextInt();
+						if(escolha < 0 || escolha > 4)
+							System.out.println("\nErro: Opção inválida\n");
+					} while(escolha < 0 || escolha > 4);
+					
+					System.out.println();
+					
+					if(escolha == 1) {
+						
+						// Cadastro de mesa
+						
+						System.out.println("Cadastro de Mesa \n");
+						
+						int quantCadeiras;
+						
+						do {
+							System.out.println("Insira a quantidade de cadeiras da mesa (ou 0 para cancelar o cadastro):");
+							quantCadeiras = entrada.nextInt();
+							if(quantCadeiras < 0)
+								System.out.println("\nErro: Insira um número maior ou igual a 0 \n");
+						} while(quantCadeiras < 0);
+						
+						if(quantCadeiras > 0) {
+							mesas.cadastrar(quantCadeiras);
+							System.out.println("\nCadastro realizado com sucesso.");
+						} else
+							System.out.println("\nCadastro cancelado.");
+						
+						System.out.println();
+					} else if(escolha == 2) {
+						
+						// Consulta de mesas ocupadas e disponíveis
+						
+						System.out.println("Consulta de Mesas Ocupadas e Disponíveis\n");
+						
+						mesas.mostrarLista();
+						
+						System.out.println("Insira qualquer tecla para voltar:");
+						entrada.nextLine();
+						entrada.nextLine();
+						
+						System.out.println();
+					} else if(escolha == 3) {
+						
+						// Alocação de mesa para clientes
+						
+						System.out.println("Ocupar Mesa\n");
+						
+						int quantPessoas;
+						
+						do {
+							System.out.println("Quantas pessoas vão ocupar a mesa? (Ou insira 0 para cancelar a operação)");
+							quantPessoas = entrada.nextInt();
+							if(quantPessoas < 0)
+								System.out.println("\nErro: Insira um número maior ou igual a 0 \n");
+						} while(quantPessoas < 0);
+						
+						System.out.println();
+						
+						if(quantPessoas > 0) {
+							int disponivel = mesas.mostrarDisponiveis(quantPessoas);
+							
+							if(disponivel < 0) {
+								System.out.println("Insira qualquer tecla para voltar:");
+								entrada.nextLine();
+								entrada.nextLine();
+							} else if(disponivel == 0) {
+								int adicionar;
+								
+								do {
+									System.out.println("Adicionar pessoa(s) à fila para sentar?");
+									System.out.println("(1) Sim");
+									System.out.println("(0) Cancelar");
+									adicionar = entrada.nextInt();
+									if(adicionar < 0 || adicionar > 1)
+										System.out.println("\nErro: Opção inválida\n");
+								} while(adicionar < 0 || adicionar > 1);
+								
+								if(adicionar == 1) {
+									filaParaSentar += quantPessoas;
+									System.out.println("\n" + quantPessoas + " pessoa(s) adicionada(s) à fila para sentar.");
+								} else
+									System.out.println("\nOperação cancelada.");
+							} else {
+								int idMesa;
+								boolean ocupar;
+								
+								do {
+									System.out.println("Em qual mesa as pessoas vão se sentar?");
+									idMesa = entrada.nextInt();
+									ocupar = mesas.ocuparMesa(idMesa, quantPessoas);
+									if(idMesa < 1 || idMesa > disponivel || !(ocupar))
+										System.out.println("\nErro: Opção inválida\n");
+								} while(idMesa < 1 || idMesa > disponivel || !(ocupar));
+								
+								if(filaParaSentar > 0) { // Ao mesmo tempo que diminui a quantidade de pessoas na fila para sentar, aumenta a quantidade na fila para almoçar
+									filaParaSentar = filaParaSentar - quantPessoas;
+									if(filaParaSentar < 0)
+										filaParaSentar = 0;
+								}
+								
+								System.out.println("\nMesa ocupada com sucesso.");
+							}
+						} else
+							System.out.println("Operação cancelada.");
+						
+						System.out.println();
+					} else if(escolha == 4) {
+						
+						// Liberação de mesas após a saída dos clientes
+						
+						System.out.println("Liberar Mesa\n");
+						
+						int ocupada = mesas.mostrarOcupadas();
+						
+						if(ocupada <= 0) {
+							System.out.println("Insira qualquer tecla para voltar:");
+							entrada.nextLine();
+							entrada.nextLine();
+						} else{
+							// Continuar
+						}
+						
+						System.out.println();
+					}
 				}
 			}
 		}

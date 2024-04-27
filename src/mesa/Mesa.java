@@ -1,7 +1,10 @@
 package mesa;
 
+import cliente.Cliente;
+
 public class Mesa {
 
+	private Cliente inicio;
 	private int id;
 	private int capacidade;
 	private int cadeirasOcupadas = 0;
@@ -9,6 +12,7 @@ public class Mesa {
 	private Mesa prox;
 	
 	public Mesa(int id, int capacidade) {
+		inicio = null;
 		setId(id);
 		setCapacidade(capacidade);
 	}
@@ -16,7 +20,41 @@ public class Mesa {
 	public boolean estaOcupada() {
 		return cadeirasOcupadas > 0;
 	}
+	
+	public boolean adicionarCliente(Cliente cliente) {
+		if(inicio == null) {
+			inicio = cliente;
+			return true;
+		} else {
+			Cliente aux = inicio;
+			while(aux.getProx() != null) {
+				if(aux == cliente)
+					return false;
+				aux = aux.getProx();
+			}
+			if(aux == cliente)
+				return false;
+			else {
+				aux.setProx(cliente);
+				return true;
+			}
+		}
+	}
+	
+	public void mostrarLista() {
+		Cliente aux = inicio;
+		int cont = 0;
+		while(aux != null){
+			System.out.println(cont + ". " + aux.getNome());
+			aux = aux.getProx();
+		}
+		System.out.println();
+	}
 
+	public Cliente getInicio() {
+		return inicio;
+	}
+	
 	public int getId() {
 		return id;
 	}
@@ -60,7 +98,9 @@ public class Mesa {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Mesa [id=");
+		builder.append("Mesa [inicio=");
+		builder.append(inicio);
+		builder.append(", id=");
 		builder.append(id);
 		builder.append(", capacidade=");
 		builder.append(capacidade);
@@ -68,6 +108,8 @@ public class Mesa {
 		builder.append(cadeirasOcupadas);
 		builder.append(", atendida=");
 		builder.append(atendida);
+		builder.append(", prox=");
+		builder.append(prox);
 		builder.append("]");
 		return builder.toString();
 	}
