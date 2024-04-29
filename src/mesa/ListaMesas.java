@@ -127,9 +127,8 @@ public class ListaMesas {
 		Cliente cliente = new Cliente(nome);
 		Mesa aux = inicio;
 		while(aux != null) {
-			if(aux.getId() == idMesa) {
+			if(aux.getId() == idMesa)
 				return aux.adicionarCliente(cliente);
-			}
 			aux = aux.getProx();
 		}
 		return false;
@@ -151,6 +150,21 @@ public class ListaMesas {
 			}
 			return false;
 		}
+	}
+	
+	public void listarClientes(int idMesa) {
+		Mesa aux = inicio;
+		while(aux != null) {
+			if(aux.getId() == idMesa) {
+				aux.mostrarLista();
+				return;
+			}
+			aux = aux.getProx();
+		}
+	}
+	
+	public void atenderMesa(int id) {
+		// Pode ser que este método seja necessário. Por isto, já o criei para me lembrar
 	}
 	
 }

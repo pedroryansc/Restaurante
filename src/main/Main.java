@@ -4,6 +4,7 @@ import java.util.Scanner;
 
 import cliente.*;
 import mesa.ListaMesas;
+import produto.ListaProdutos;
 
 public class Main {
 	public static void main(String[] args) {
@@ -14,6 +15,7 @@ public class Main {
 		
 		ListaClientes clientes = new ListaClientes();
 		ListaMesas mesas = new ListaMesas();
+		ListaProdutos produtos = new ListaProdutos();
 		
 		// Inicialização das variáveis de estatística
 		
@@ -32,9 +34,10 @@ public class Main {
 				System.out.println("(1) Clientes");
 				System.out.println("(2) Pedidos");
 				System.out.println("(3) Mesas");
-				System.out.println("(4) Funcionários");
-				System.out.println("(5) Pagamentos");
-				System.out.println("(6) Estatísticas");
+				System.out.println("(4) Produtos");
+				System.out.println("(5) Funcionários");
+				System.out.println("(6) Pagamentos");
+				System.out.println("(7) Estatísticas");
 				System.out.println("(0) Sair");
 				sistema = entrada.nextInt();
 				if(sistema < 0 || sistema > 6)
@@ -185,6 +188,39 @@ public class Main {
 								entrada.nextLine();
 							}
 						} while(remover == 0);
+						
+						System.out.println();
+					}
+				}
+			} else if(sistema == 2) {
+				
+				// Seção "Pedidos"
+				
+				int escolha = -1;
+				
+				while(escolha != 0) {
+					System.out.println("Pedidos\n");
+					
+					do {
+						System.out.println("O que você gostaria de fazer?");
+						System.out.println("(1) Fazer pedido");
+						System.out.println("(2) Consultar pedidos realizados");
+						System.out.println("(3) Alterar pedido");
+						System.out.println("(4) Cancelar pedido");
+						System.out.println("(5) Entregar pedido");
+						System.out.println("(0) Voltar");
+						escolha = entrada.nextInt();
+						if(escolha < 0 || escolha > 5)
+							System.out.println("\nErro: Opção inválida\n");
+					} while(escolha < 0 || escolha > 5);
+					
+					System.out.println();
+					
+					if(escolha == 1) {
+						
+						// Registro de novos pedidos
+						
+						System.out.println("Registro de Pedido");
 						
 						System.out.println();
 					}
@@ -377,6 +413,70 @@ public class Main {
 							else
 								System.out.println("\nOperação cancelada.");
 						}
+						
+						System.out.println();
+					}
+				}
+			} else if(sistema == 4) {
+				
+				// Seção "Produtos"
+				
+				int escolha = -1;
+				
+				while(escolha != 0) {
+					System.out.println("Produtos\n");
+					
+					do {
+						System.out.println("O que você gostaria de fazer?");
+						System.out.println("(1) Cadastrar produto");
+						System.out.println("(2) Consultar produtos");
+						System.out.println("(0) Voltar");
+						escolha = entrada.nextInt();
+						if(escolha < 0 || escolha > 2)
+							System.out.println("\nErro: Opção inválida\n");
+					} while(escolha < 0 || escolha > 2);
+					
+					System.out.println();
+					
+					if(escolha == 1) {
+						
+						// Cadastro de produto
+						
+						System.out.println("Cadastro de Produto\n");
+						
+						entrada.nextLine();
+						
+						System.out.println("Insira o nome do produto (ou 0 para cancelar o cadastro):");
+						String nome = entrada.nextLine();
+						
+						if(!(nome.equals("0"))) {
+							double preco;
+							
+							do {
+								System.out.println("\nPreço do produto:");
+								preco = entrada.nextDouble();
+								if(preco < 0)
+									System.out.println("\nErro: Insira um valor maior que 0\n");
+							} while(preco < 0);
+							
+							produtos.cadastrar(nome, preco);
+							
+							System.out.println("\nCadastro realizado com sucesso.");
+						} else
+							System.out.println("\nCadastro cancelado.");
+						
+						System.out.println();
+					} else if(escolha == 2) {
+						
+						// Consulta dos produtos cadastrados
+						
+						System.out.println("Lista de Produtos\n");
+						
+						produtos.mostrarLista();
+						
+						System.out.println("Insira qualquer tecla para voltar:");
+						entrada.nextLine();
+						entrada.nextLine();
 						
 						System.out.println();
 					}
