@@ -68,13 +68,14 @@ public class ListaPedidos {
 			int idPedido = 0;
 			while(aux != null) {
 				if(!(aux.foiEntregue())) {
-					System.out.println(aux.getId() + ". Pedido" + aux.getId() + " | Mesa " + aux.getIdMesa());
+					System.out.println(aux.getId() + ". Pedido " + aux.getId() + " | Mesa " + aux.getIdMesa());
 					if(idPedido == 0)
 						idPedido = aux.getId();
 				}
 				aux = aux.getProx();
 			}
-			System.out.println();
+			if(idPedido == 0)
+				System.out.println("Todos os pedidos foram entregues.\n");
 			return idPedido;
 		}
 	}
@@ -87,6 +88,17 @@ public class ListaPedidos {
 			aux = aux.getProx();
 		}
 		return null;
+	}
+	
+	public void entregar(int idPedido) {
+		Pedido aux = inicio;
+		while(aux != null) {
+			if(aux.getId() == idPedido) {
+				aux.setEntregue(true);
+				return;
+			}
+			aux = aux.getProx();
+		}
 	}
 	
 }

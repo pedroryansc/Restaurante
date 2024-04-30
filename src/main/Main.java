@@ -21,7 +21,6 @@ public class Main {
 		
 		// Criação de nodos de exemplo
 		
-		/*
 		clientes.cadastrar("Pedro");
 		clientes.cadastrar("Igor");
 		produtos.cadastrar("Arroz", 7);
@@ -30,7 +29,6 @@ public class Main {
 		produtos.cadastrar("Ovo Frito", 1);
 		produtos.cadastrar("Batata Frita", 4);
 		mesas.cadastrar(2);
-		*/
 		
 		// Inicialização das variáveis de estatística
 		
@@ -340,11 +338,11 @@ public class Main {
 						
 						// Consulta de pedidos realizados
 						
-						System.out.println("Lista de Pedidos Realizados\n");
-						
 						boolean visualizar = true;
 						
 						while(visualizar) {
+							System.out.println("Lista de Pedidos Realizados\n");
+							
 							int quantPedidos = pedidos.mostrarLista();
 							
 							if(quantPedidos > 0) {
@@ -415,15 +413,82 @@ public class Main {
 						
 						System.out.println("Cancelamento de Pedido\n");
 						
-						int quantPedidos = pedidos.mostrarLista();
+						int quantPedidos = pedidos.mostrarNaoEntregues();
 						
-						if(quantPedidos > 0) {
-							
-						} else {
+						if(quantPedidos <= 0) {
 							System.out.println("Insira qualquer tecla para voltar:");
 							entrada.nextLine();
 							entrada.nextLine();
+						} else {
+							
+							// Continuar
+							
 						}
+						
+						System.out.println();
+					} else if(escolha == 5) {
+						
+						// Entregar pedido na mesa do cliente
+						
+						System.out.println("Entregar Pedido\n");
+						
+						int entregar = -1;
+						
+						do {
+							int quantPedidos = pedidos.mostrarNaoEntregues();
+							
+							if(quantPedidos <= 0) {
+								System.out.println("Insira qualquer tecla para voltar:");
+								entrada.nextLine();
+								entrada.nextLine();
+							} else {
+								int idPedido;
+								Pedido pedido;
+								boolean foiEntregue = false;
+								
+								System.out.println();
+								
+								do {
+									System.out.println("Insira o número do pedido a ser entregue (ou 0 para cancelar a operação):");
+									idPedido = entrada.nextInt();
+									pedido = pedidos.pesquisarPedido(idPedido);
+									if(pedido != null) {
+										if(pedido.foiEntregue())
+											foiEntregue = true;
+										else
+											foiEntregue = false;
+									}
+									if(idPedido < 0 || idPedido > quantPedidos || (pedido == null && idPedido != 0) || (foiEntregue && idPedido != 0))
+										System.out.println("\nErro: Opção inválida\n");
+								} while(idPedido < 0 || idPedido > quantPedidos || (pedido == null && idPedido != 0) || (foiEntregue && idPedido != 0));
+								
+								System.out.println();
+								
+								if(idPedido != 0) {
+									do {
+										System.out.println("Entregar pedido " + pedido.getId() + " para a mesa " + pedido.getIdMesa() + "?");
+										System.out.println("(1) Sim");
+										System.out.println("(0) Cancelar");
+										entregar = entrada.nextInt();
+										if(entregar < 0 || entregar > 1)
+											System.out.println("\nErro: Opção inválida\n");
+									} while(entregar < 0 || entregar > 1);
+									
+									System.out.println();
+									
+									if(entregar == 1) {
+										pedidos.entregar(idPedido);
+										System.out.println("Entrega realizada com sucesso.");
+									} else
+										System.out.println("Operação cancelada.\n");
+								} else {
+									System.out.println("Operação cancelada.");
+									entregar = -1;
+								}
+							}
+						} while(entregar == 0);
+						
+						System.out.println();
 					}
 				}
 			} else if(sistema == 3) {
