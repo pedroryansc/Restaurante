@@ -41,14 +41,16 @@ public class Mesa {
 		}
 	}
 	
-	public void mostrarLista() {
+	public int mostrarLista() {
 		Cliente aux = inicio;
 		int cont = 0;
 		while(aux != null){
+			cont++;
 			System.out.println(cont + ". " + aux.getNome());
 			aux = aux.getProx();
 		}
 		System.out.println();
+		return cont;
 	}
 
 	public Cliente getInicio() {

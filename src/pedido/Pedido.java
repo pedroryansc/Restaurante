@@ -6,6 +6,7 @@ import cliente.Cliente;
 public class Pedido {
 
 	private Produto inicio;
+	private int id;
 	private int idMesa;
 	private Cliente cliente;
 	private double valorTotal;
@@ -13,14 +14,45 @@ public class Pedido {
 	private boolean pago = false;
 	private Pedido prox;
 	
-	public Pedido(int idMesa, Cliente cliente) {
+	public Pedido(int id, int idMesa, Cliente cliente) {
 		inicio = null;
+		setId(id);
 		setIdMesa(idMesa);
 		setCliente(cliente);
 	}
 
+	public void adicionarProduto(Produto produto, int quantidade) {
+		if(inicio == null) {
+			produto.setQuantidade(quantidade);
+			inicio = produto;
+		} else {
+			Produto aux = inicio;
+			while(aux.getProx() != null) {
+				if(aux.getId() == produto.getId()) {
+					aux.setQuantidade(aux.getQuantidade() + quantidade);
+					return;
+				}
+				aux = aux.getProx();
+			}
+			if(aux.getId() == produto.getId()) {
+				aux.setQuantidade(aux.getQuantidade() + quantidade);
+			} else {
+				produto.setQuantidade(quantidade);
+				aux.setProx(produto);
+			}
+		}
+	}
+	
 	public Produto getInicio() {
 		return inicio;
+	}
+	
+	public int getId() {
+		return id;
+	}
+	
+	public void setId(int id) {
+		this.id = id;
 	}
 	
 	public int getIdMesa() {
@@ -76,6 +108,8 @@ public class Pedido {
 		StringBuilder builder = new StringBuilder();
 		builder.append("Pedido [inicio=");
 		builder.append(inicio);
+		builder.append(", id=");
+		builder.append(id);
 		builder.append(", idMesa=");
 		builder.append(idMesa);
 		builder.append(", cliente=");

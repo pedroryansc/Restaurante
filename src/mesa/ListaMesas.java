@@ -41,7 +41,7 @@ public class ListaMesas {
 					System.out.print("Disponível)");
 				System.out.print(" | Capacidade: " + aux.getCapacidade() + " pessoa(s)");
 				if(!(aux.foiAtendida()))
-					System.out.println(" - Não atendida" + aux.getInicio());
+					System.out.println(" - Não atendida");
 				else
 					System.out.println();
 				aux = aux.getProx();
@@ -152,19 +152,45 @@ public class ListaMesas {
 		}
 	}
 	
-	public void listarClientes(int idMesa) {
+	public int listarClientes(int idMesa) {
 		Mesa aux = inicio;
 		while(aux != null) {
 			if(aux.getId() == idMesa) {
-				aux.mostrarLista();
-				return;
+				return aux.mostrarLista();
 			}
 			aux = aux.getProx();
 		}
+		return 0;
 	}
 	
-	public void atenderMesa(int id) {
-		// Pode ser que este método seja necessário. Por isto, já o criei para me lembrar
+	public boolean atenderMesa(int id) {
+		if(id == 0)
+			return true;
+		else {
+			Mesa aux = inicio;
+			while(aux != null) {
+				if(aux.getId() == id && aux.estaOcupada()) {
+					aux.setAtendida(true);
+					return true;
+				}
+				aux = aux.getProx();
+			}
+			return false;
+		}
+	}
+	
+	public Cliente pesquisarCliente(int idMesa, int posicao) {
+		Mesa aux = inicio;
+		while(aux != null) {
+			if(aux.getId() == idMesa) {
+				Cliente cliente = aux.getInicio();
+				for(int i = 1; i < posicao; i++)
+					cliente = cliente.getProx();
+				return cliente;
+			}
+			aux = aux.getProx();
+		}
+		return null;
 	}
 	
 }

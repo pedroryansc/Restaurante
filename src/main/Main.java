@@ -3,8 +3,9 @@ package main;
 import java.util.Scanner;
 
 import cliente.*;
+import pedido.*;
 import mesa.ListaMesas;
-import produto.ListaProdutos;
+import produto.*;
 
 public class Main {
 	public static void main(String[] args) {
@@ -14,8 +15,22 @@ public class Main {
 		// Criação das listas
 		
 		ListaClientes clientes = new ListaClientes();
+		ListaPedidos pedidos = new ListaPedidos();
 		ListaMesas mesas = new ListaMesas();
 		ListaProdutos produtos = new ListaProdutos();
+		
+		// Criação de nodos de exemplo
+		
+		/*
+		clientes.cadastrar("Pedro");
+		clientes.cadastrar("Igor");
+		produtos.cadastrar("Arroz", 7);
+		produtos.cadastrar("Feijão", 7);
+		produtos.cadastrar("Farofa", 1);
+		produtos.cadastrar("Ovo Frito", 1);
+		produtos.cadastrar("Batata Frita", 4);
+		mesas.cadastrar(2);
+		*/
 		
 		// Inicialização das variáveis de estatística
 		
@@ -40,9 +55,9 @@ public class Main {
 				System.out.println("(7) Estatísticas");
 				System.out.println("(0) Sair");
 				sistema = entrada.nextInt();
-				if(sistema < 0 || sistema > 6)
+				if(sistema < 0 || sistema > 7)
 					System.out.println("\nErro: Opção inválida\n");
-			} while(sistema < 0 || sistema > 6);
+			} while(sistema < 0 || sistema > 7);
 			
 			System.out.println();
 			
@@ -220,9 +235,195 @@ public class Main {
 						
 						// Registro de novos pedidos
 						
-						System.out.println("Registro de Pedido");
+						System.out.println("Registro de Pedido\n");
+						
+						if(produtos.contarProdutos() > 0) {
+							int ocupada = mesas.mostrarOcupadas();
+							
+							System.out.println();
+							
+							if(ocupada <= 0) {
+								System.out.println("Insira qualquer tecla para voltar:");
+								entrada.nextLine();
+								entrada.nextLine();
+							} else {
+								int idMesa;
+								boolean atender;
+								
+								do {
+									System.out.println("Qual mesa será atendida? (Ou insira 0 para cancelar o pedido)");
+									idMesa = entrada.nextInt();
+									atender = mesas.atenderMesa(idMesa);
+									if(idMesa < 0 || idMesa > ocupada || !(atender))
+										System.out.println("\nErro: Opção inválida\n");
+								} while(idMesa < 0 || idMesa > ocupada || !(atender));
+								
+								System.out.println();
+								
+								if(idMesa != 0) {
+									int quantClientes = mesas.listarClientes(idMesa);
+									
+									int posicao;
+									
+									do {
+										System.out.println("O pedido estará no nome de qual cliente?");
+										posicao = entrada.nextInt();
+										if(posicao < 1 || posicao > quantClientes)
+											System.out.println("\nErro: Opção inválida\n");
+									} while(posicao < 1 || posicao > quantClientes);
+									
+									Cliente cliente = mesas.pesquisarCliente(idMesa, posicao);
+									pedidos.fazerPedido(idMesa, cliente.getNome());
+									
+									System.out.println();
+									
+									int quantProdutos;
+									int idProduto;
+									boolean finalizar = false;
+									
+									while(!(finalizar)) {
+										do {
+											quantProdutos = produtos.mostrarLista();
+											
+											System.out.print("Insira o número do produto para adicioná-lo ao pedido");
+											if(pedidos.getInicio().getInicio() != null)
+												System.out.println(" (ou 0 para finalizar)");
+											else
+												System.out.println();
+											
+											idProduto = entrada.nextInt();
+											
+											if(pedidos.getInicio().getInicio() != null) {
+												if(idProduto < 0 || idProduto > quantProdutos)
+													System.out.println("\nErro: Opção inválida\n");
+												else if(idProduto == 0)
+													finalizar = true;
+											} else {
+												if(idProduto <= 0 || idProduto > quantProdutos) {
+													System.out.println("\nErro: Opção inválida\n");
+													idProduto = -1;
+												}
+											}
+										} while(idProduto < 0 || idProduto > quantProdutos);
+										
+										if(idProduto > 0 && idProduto <= quantProdutos) {
+											Produto produto = produtos.pesquisarProduto(idProduto);
+											
+											int quantidade;
+											
+											do {
+												System.out.println("\nQual é a quantidade desejada de " + produto.getNome() + "?");
+												quantidade = entrada.nextInt();
+												if(quantidade <= 0)
+													System.out.println("\nErro: Insira um número maior que 0");
+											} while(quantidade <= 0);
+											
+											pedidos.adicionarProduto(pedidos.getInicio().getId(), produto, quantidade);
+											
+											System.out.println("\n" + quantidade + " unidade(s) de " + produto.getNome() + " adicionada(s) com sucesso.\n");
+										}
+									}
+									
+									System.out.println("\nPedido realizado com sucesso.");
+								} else
+									System.out.println("Pedido cancelado.");
+							}
+						} else {
+							System.out.println("Nenhum produto foi cadastrado.\n");
+							System.out.println("Insira qualquer tecla para voltar:");
+							entrada.nextLine();
+							entrada.nextLine();
+						}
 						
 						System.out.println();
+					} else if(escolha == 2) {
+						
+						// Consulta de pedidos realizados
+						
+						System.out.println("Lista de Pedidos Realizados\n");
+						
+						boolean visualizar = true;
+						
+						while(visualizar) {
+							int quantPedidos = pedidos.mostrarLista();
+							
+							if(quantPedidos > 0) {
+								int idPedido;
+								Pedido pedido;
+								
+								do {
+									System.out.println("Qual pedido você quer visualizar? (Ou insira 0 para voltar)");
+									idPedido = entrada.nextInt();
+									pedido = pedidos.pesquisarPedido(idPedido);
+									if(idPedido < 0 || idPedido > quantPedidos || (pedido == null && idPedido != 0))
+										System.out.println("\nErro: Opção inválida\n");
+								} while(idPedido < 0 || idPedido > quantPedidos || (pedido == null && idPedido != 0));
+								
+								if(idPedido != 0) {
+									System.out.println("\nPedido " + pedido.getId() + " (Mesa " + pedido.getIdMesa() + ")\n");
+									
+									System.out.println("Cliente: " + pedido.getCliente().getNome());
+									System.out.println("Valor Total: R$ " + pedido.getValorTotal());
+									System.out.print("Status: ");
+									if(pedido.foiEntregue()) {
+										if(pedido.foiPago())
+											System.out.println("Pago");
+										else
+											System.out.println("Entregue - Não pago");
+									} else
+										System.out.println("Não entregue");
+									
+									System.out.println("\nInsira qualquer tecla para voltar:");
+									entrada.nextLine();
+									entrada.nextLine();
+									
+									System.out.println();
+								} else
+									visualizar = false;
+							} else {
+								System.out.println("Insira qualquer tecla para voltar:");
+								entrada.nextLine();
+								entrada.nextLine();
+								
+								visualizar = false;
+							}
+						}
+						
+						System.out.println();
+					} else if(escolha == 3) {
+						
+						// Alteração de pedidos
+						
+						System.out.println("Alteração de Pedido\n");
+						
+						int quantPedidos = pedidos.mostrarLista();
+						
+						if(quantPedidos > 0) {
+							
+							// Continuar
+							
+						} else {
+							System.out.println("Insira qualquer tecla para voltar:");
+							entrada.nextLine();
+							entrada.nextLine();
+						}
+						
+						System.out.println();
+					} else if(escolha == 4) {
+						
+						// Cancelamento de pedidos
+						
+						System.out.println("Cancelamento de Pedido\n");
+						
+						int quantPedidos = pedidos.mostrarLista();
+						
+						if(quantPedidos > 0) {
+							
+						} else {
+							System.out.println("Insira qualquer tecla para voltar:");
+							entrada.nextLine();
+							entrada.nextLine();
+						}
 					}
 				}
 			} else if(sistema == 3) {
@@ -455,9 +656,9 @@ public class Main {
 							do {
 								System.out.println("\nPreço do produto:");
 								preco = entrada.nextDouble();
-								if(preco < 0)
-									System.out.println("\nErro: Insira um valor maior que 0\n");
-							} while(preco < 0);
+								if(preco <= 0)
+									System.out.println("\nErro: Insira um valor maior que 0");
+							} while(preco <= 0);
 							
 							produtos.cadastrar(nome, preco);
 							
