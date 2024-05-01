@@ -86,6 +86,17 @@ public class ListaMesas {
 		}
 	}
 	
+	public int contarDisponiveis() {
+		Mesa aux = inicio;
+		int cont = 0;
+		while(aux != null) {
+			if(!(aux.estaOcupada()))
+				cont++;
+			aux = aux.getProx();
+		}
+		return cont;
+	}
+	
 	public int mostrarOcupadas() {
 		if(inicio == null) {
 			System.out.println("Nenhuma mesa foi cadastrada.");
@@ -177,6 +188,16 @@ public class ListaMesas {
 			}
 			return false;
 		}
+	}
+	
+	public Mesa pesquisarMesa(int idMesa) {
+		Mesa aux = inicio;
+		while(aux != null) {
+			if(aux.getId() == idMesa)
+				return aux;
+			aux = aux.getProx();
+		}
+		return null;
 	}
 	
 	public Cliente pesquisarCliente(int idMesa, int posicao) {

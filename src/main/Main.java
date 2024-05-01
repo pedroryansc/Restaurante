@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 import cliente.*;
 import pedido.*;
-import mesa.ListaMesas;
+import mesa.*;
 import produto.*;
 import funcionario.*;
 
@@ -32,9 +32,12 @@ public class Main {
 		produtos.cadastrar("Batata Frita", 4);
 		mesas.cadastrar(2);
 		
-		// Inicialização das variáveis de estatística
+		// Inicialização das variáveis de estatísticas
 		
 		int filaSentar = 0;
+		int filaNaoAtendidos = 0;
+		int pessoasAlmocando = 0;
+		int pessoasAtendidas = 0;
 		
 		int sistema = 1;
 		
@@ -248,15 +251,24 @@ public class Main {
 								entrada.nextLine();
 							} else {
 								int idMesa;
-								boolean atender;
+								Mesa mesaPedido;
+								boolean disponivel = false;
 								
 								do {
 									System.out.println("Qual mesa será atendida? (Ou insira 0 para cancelar o pedido)");
 									idMesa = entrada.nextInt();
-									atender = mesas.atenderMesa(idMesa);
-									if(idMesa < 0 || idMesa > ocupada || !(atender))
+									mesaPedido = mesas.pesquisarMesa(idMesa);
+									if(mesaPedido != null){
+										if(!(mesaPedido.estaOcupada()))
+											disponivel = true;
+										else
+											disponivel = false;
+									}
+									if(idMesa == 0)
+										disponivel = false;
+									if(idMesa < 0 || idMesa > ocupada || disponivel)
 										System.out.println("\nErro: Opção inválida\n");
-								} while(idMesa < 0 || idMesa > ocupada || !(atender));
+								} while(idMesa < 0 || idMesa > ocupada || disponivel);
 								
 								System.out.println();
 								
@@ -543,6 +555,22 @@ public class Main {
 									
 									if(entregar == 1) {
 										pedidos.entregar(idPedido);
+										
+										// Quando um pedido é entregue a uma mesa não atendida:
+										// - A mesa muda seu estado para "atendida";
+										// - A fila de pessoas não atendidas diminui;
+										// - A quantidade de pessoas almoçando aumenta; e
+										// - A quantidade de pessoas atendidas aumenta.
+										
+										Mesa mesaAtendida = mesas.pesquisarMesa(pedido.getIdMesa());
+										
+										if(!(mesaAtendida.foiAtendida())) {
+											mesas.atenderMesa(pedido.getIdMesa());
+											filaNaoAtendidos = filaNaoAtendidos - mesaAtendida.getCadeirasOcupadas();
+											pessoasAlmocando += mesaAtendida.getCadeirasOcupadas();
+											pessoasAtendidas += mesaAtendida.getCadeirasOcupadas();
+										}
+										
 										System.out.println("Entrega realizada com sucesso.");
 									} else
 										System.out.println("Operação cancelada.\n");
@@ -670,12 +698,6 @@ public class Main {
 									
 									System.out.println();
 									
-									if(filaSentar > 0) { // Ao mesmo tempo que diminui a quantidade de pessoas na fila para sentar, aumenta a quantidade na fila para almoçar
-										filaSentar = filaSentar - quantPessoas;
-										if(filaSentar < 0)
-											filaSentar = 0;
-									}
-									
 									int posicao;
 									boolean adicionar = true;
 									
@@ -700,6 +722,18 @@ public class Main {
 										
 										System.out.println();
 									}
+									
+									// Se houver alguma pessoa na fila para sentar, ao ocupar uma mesa, a fila diminui
+									
+									if(filaSentar > 0) {
+										filaSentar = filaSentar - quantPessoas;
+										if(filaSentar < 0)
+											filaSentar = 0;
+									}
+									
+									// Juntamente, quando a fila para sentar diminui, a fila de pessoas não atendidas aumenta
+									
+									filaNaoAtendidos += quantPessoas;
 									
 									System.out.println("Mesa ocupada com sucesso.");
 								}
@@ -729,11 +763,27 @@ public class Main {
 							entrada.nextLine();
 						} else{
 							int idMesa;
+							Mesa mesaLiberada;
 							boolean liberar;
 							
 							do {
 								System.out.println("Qual mesa você quer liberar? (Ou insira 0 para cancelar a operação)");
 								idMesa = entrada.nextInt();
+								mesaLiberada = mesas.pesquisarMesa(idMesa);
+								if(mesaLiberada != null) {
+									if(mesaLiberada.estaOcupada()) {
+										
+										// Se a mesa foi liberada sem ser atendida, a fila de pessoas não atendidas diminui.
+										// Caso contrário, a quantidade de pessoas almoçando diminui e a fila do caixa aumenta.
+										
+										if(!(mesaLiberada.foiAtendida()))
+											filaNaoAtendidos = filaNaoAtendidos - mesaLiberada.getCadeirasOcupadas();
+										else {
+											pessoasAlmocando = pessoasAlmocando - mesaLiberada.getCadeirasOcupadas();
+											Cliente aux = mesaLiberada.getInicio();
+										}
+									}
+								}
 								liberar = mesas.liberarMesa(idMesa);
 								if(idMesa < 0 || idMesa > ocupada || !(liberar))
 									System.out.println("\nErro: Opção inválida\n");
@@ -1036,7 +1086,27 @@ public class Main {
 						
 					}
 				}
+			} else if(sistema == 7) {
 				
+				// Seção "Estatísticas"
+				
+				int filaAlmocar = filaSentar + filaNaoAtendidos;
+				
+				System.out.println("Estatísticas\n");
+				
+				System.out.println("Pessoas na fila para sentar: " + filaSentar + " pessoa(s)");
+				System.out.println("Pessoas na fila para serem atendidas: " + filaNaoAtendidos + " pessoa(s)");
+				System.out.println("Pessoas na fila para almoçar: " + filaAlmocar + " pessoa(s)");
+				System.out.println("Pessoas almoçando: " + pessoasAlmocando + " pessoa(s)");
+				System.out.println("Pessoas atendidas: " + pessoasAtendidas + " pessoa(s)");
+				System.out.println("Pessoas na fila do caixa: " + " pessoa(s)");
+				System.out.println("Mesas disponíveis: " + mesas.contarDisponiveis() + " mesa(s)");
+				
+				System.out.println("\nInsira qualquer tecla para voltar");
+				entrada.nextLine();
+				entrada.nextLine();
+				
+				System.out.println();
 			}
 		}
 		System.out.print("Fim do sistema");
