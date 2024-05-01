@@ -80,6 +80,21 @@ public class ListaPedidos {
 		}
 	}
 	
+	public void cancelar(int idPedido) {
+		if(inicio.getId() == idPedido)
+			inicio = inicio.getProx();
+		else {
+			Pedido aux = inicio;
+			while(aux.getProx() != null) {
+				if(aux.getProx().getId() == idPedido) {
+					aux.setProx(aux.getProx().getProx());
+					return;
+				}
+				aux = aux.getProx();
+			}
+		}
+	}
+	
 	public Pedido pesquisarPedido(int idPedido) {
 		Pedido aux = inicio;
 		while(aux != null) {

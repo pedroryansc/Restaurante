@@ -6,6 +6,7 @@ import cliente.*;
 import pedido.*;
 import mesa.ListaMesas;
 import produto.*;
+import funcionario.*;
 
 public class Main {
 	public static void main(String[] args) {
@@ -18,6 +19,7 @@ public class Main {
 		ListaPedidos pedidos = new ListaPedidos();
 		ListaMesas mesas = new ListaMesas();
 		ListaProdutos produtos = new ListaProdutos();
+		ListaFuncionarios funcs = new ListaFuncionarios();
 		
 		// Criação de nodos de exemplo
 		
@@ -360,6 +362,9 @@ public class Main {
 								if(idPedido != 0) {
 									System.out.println("\nPedido " + pedido.getId() + " (Mesa " + pedido.getIdMesa() + ")\n");
 									
+									System.out.println("Produtos:");
+									pedido.mostrarProdutos();
+									
 									System.out.println("Cliente: " + pedido.getCliente().getNome());
 									System.out.println("Valor Total: R$ " + pedido.getValorTotal());
 									System.out.print("Status: ");
@@ -394,7 +399,7 @@ public class Main {
 						
 						System.out.println("Alteração de Pedido\n");
 						
-						int quantPedidos = pedidos.mostrarLista();
+						int quantPedidos = pedidos.mostrarNaoEntregues();
 						
 						if(quantPedidos > 0) {
 							
@@ -413,17 +418,67 @@ public class Main {
 						
 						System.out.println("Cancelamento de Pedido\n");
 						
-						int quantPedidos = pedidos.mostrarNaoEntregues();
+						int cancelar = -1;
 						
-						if(quantPedidos <= 0) {
-							System.out.println("Insira qualquer tecla para voltar:");
-							entrada.nextLine();
-							entrada.nextLine();
-						} else {
+						do {
+							int quantPedidos = pedidos.mostrarNaoEntregues();
 							
-							// Continuar
-							
-						}
+							if(quantPedidos <= 0) {
+								System.out.println("Insira qualquer tecla para voltar:");
+								entrada.nextLine();
+								entrada.nextLine();
+							} else {
+								int idPedido;
+								Pedido pedido;
+								boolean foiEntregue = false;
+								
+								do {
+									System.out.println("\nQual pedido você quer cancelar? (Ou insira 0 para cancelar a operação)");
+									idPedido = entrada.nextInt();
+									pedido = pedidos.pesquisarPedido(idPedido);
+									if(pedido != null) {
+										if(pedido.foiEntregue())
+											foiEntregue = true;
+										else
+											foiEntregue = false;
+									}
+									if(idPedido < 0 || idPedido > quantPedidos || ((pedido == null || foiEntregue) && idPedido != 0))
+										System.out.println("\nErro: Opção inválida");
+								} while(idPedido < 0 || idPedido > quantPedidos || ((pedido == null || foiEntregue) && idPedido != 0));
+								
+								System.out.println();
+								
+								if(idPedido != 0) {
+									System.out.println("Pedido " + pedido.getId() + " (Mesa " + pedido.getIdMesa() + ")\n");
+									
+									System.out.println("Produtos:");
+									pedido.mostrarProdutos();
+									
+									System.out.println("Cliente: " + pedido.getCliente().getNome());
+									System.out.println("Valor Total: R$ " + pedido.getValorTotal());
+									
+									System.out.println();
+									
+									do {
+										System.out.println("Tem certeza de que quer cancelar o pedido " + pedido.getId() + " da mesa " + pedido.getIdMesa() + "?");
+										System.out.println("(1) Sim");
+										System.out.println("(0) Cancelar");
+										cancelar = entrada.nextInt();
+										if(cancelar < 0 || cancelar > 1)
+											System.out.println("\nErro: Opção inválida\n");
+									} while(cancelar < 0 || cancelar > 1);
+									
+									if(cancelar == 1) {
+										pedidos.cancelar(idPedido);
+										System.out.println("\nPedido cancelado com sucesso.");
+									} else
+										System.out.println("\nOperação cancelada.\n");
+								} else {
+									System.out.println("Operação cancelada.");
+									cancelar = -1;
+								}
+							}
+						} while(cancelar == 0);
 						
 						System.out.println();
 					} else if(escolha == 5) {
@@ -465,6 +520,16 @@ public class Main {
 								System.out.println();
 								
 								if(idPedido != 0) {
+									System.out.println("Pedido " + pedido.getId() + " (Mesa " + pedido.getIdMesa() + ")\n");
+									
+									System.out.println("Produtos:");
+									pedido.mostrarProdutos();
+									
+									System.out.println("Cliente: " + pedido.getCliente().getNome());
+									System.out.println("Valor Total: R$ " + pedido.getValorTotal());
+									
+									System.out.println();
+									
 									do {
 										System.out.println("Entregar pedido " + pedido.getId() + " para a mesa " + pedido.getIdMesa() + "?");
 										System.out.println("(1) Sim");
@@ -747,6 +812,231 @@ public class Main {
 						System.out.println();
 					}
 				}
+			} else if(sistema == 5) {
+				
+				// Seção "Funcionários"
+				
+				int escolha = -1;
+				
+				while(escolha != 0) {
+					System.out.println("Funcionários\n");
+					
+					do {
+						System.out.println("O que você gostaria de fazer?");
+						System.out.println("(1) Cadastrar funcionário");
+						System.out.println("(2) Consultar funcionários cadastrados");
+						System.out.println("(3) Consultar escala de trabalho dos funcionários");
+						System.out.println("(4) Remover funcionário");
+						System.out.println("(0) Voltar");
+						escolha = entrada.nextInt();
+						if(escolha < 0 || escolha > 4)
+							System.out.println("\nErro: Opção inválida\n");
+					} while(escolha < 0 || escolha > 4);
+					
+					System.out.println();
+					
+					if(escolha == 1) {
+						
+						// Cadastro de novos funcionários, como garçons, cozinheiros, etc
+						
+						System.out.println("Cadastro de Funcionário\n");
+						
+						entrada.nextLine();
+						
+						System.out.println("Insira o nome do funcionário (ou 0 para cancelar o cadastro):");
+						String nome = entrada.nextLine();
+						
+						System.out.println();
+						
+						if(!(nome.equals("0"))){
+							System.out.println("Cargo do funcionário:");
+							String cargo = entrada.nextLine();
+							
+							int[] dias = new int[7];
+							
+							int contDias = 0;
+							boolean indeterminado = true;
+							
+							do {
+								for(int i = 0; i < 7; i++) {
+									
+									do {
+										System.out.print("\nO funcionário trabalha ");
+										if(i == 0)
+											System.out.println("às segundas-feiras?");
+										else if(i == 1)
+											System.out.println("às terças-feiras?");
+										else if(i == 2)
+											System.out.println("às quartas-feiras?");
+										else if(i == 3)
+											System.out.println("às quintas-feiras?");
+										else if(i == 4)
+											System.out.println("às sextas-feiras?");
+										else if(i == 5)
+											System.out.println("aos sábados?");
+										else
+											System.out.println("aos domingos?");
+										System.out.println("(1) Sim");
+										System.out.println("(0) Não trabalha");
+										dias[i] = entrada.nextInt();
+										if(dias[i] < 0 || dias[i] > 1)
+											System.out.println("\nErro: Opção inválida");
+										else if(dias[i] == 1)
+											contDias++;
+									} while(dias[i] < 0 || dias[i] > 1);
+								}
+								
+								if(contDias > 0)
+									indeterminado = false;
+								else {
+									System.out.println("\nNenhum dia de trabalho foi definido para " + nome + ".");
+									System.out.println("Por favor, responda novamente");
+								}
+							} while(indeterminado);
+							
+							funcs.cadastrar(nome, cargo, dias);
+							System.out.println("\nCadastro realizado com sucesso.");
+						} else
+							System.out.println("Cadastro cancelado.");
+						
+						System.out.println();
+					} else if(escolha == 2) {
+						
+						// Consulta de funcionários cadastrados
+						
+						boolean visualizar = true;
+						
+						while(visualizar) {
+							System.out.println("Lista de Funcionários\n");
+							
+							int quantFuncs = funcs.mostrarLista();
+							
+							if(quantFuncs == 0) {
+								System.out.println("Insira qualquer tecla para voltar:");
+								entrada.nextLine();
+								entrada.nextLine();
+								
+								visualizar = false;
+							} else {
+								int posicao;
+								
+								do {
+									System.out.println("Qual funcionário você quer visualizar? (Ou insira 0 para voltar)");
+									posicao = entrada.nextInt();
+									if(posicao < 0 || posicao > quantFuncs)
+										System.out.println("\nErro: Opção inválida\n");
+								} while(posicao < 0 || posicao > quantFuncs);
+								
+								if(posicao != 0) {
+									System.out.println();
+									
+									funcs.mostrarFuncionario(posicao);
+									
+									System.out.println("Insira qualquer tecla para voltar:");
+									entrada.nextLine();
+									entrada.nextLine();
+									
+									System.out.println();
+								} else
+									visualizar = false;
+							}
+						}
+						
+						System.out.println();
+					} else if(escolha == 3) {
+						
+						// Escala de trabalho dos funcionários
+						
+						System.out.println("Escala de Trabalho dos Funcionários\n");
+						
+						funcs.mostrarEscala();
+						
+						System.out.println("Insira qualquer tecla para voltar:");
+						entrada.nextLine();
+						entrada.nextLine();
+						
+						System.out.println();
+					} else if(escolha == 4) {
+						
+						// Remoção de funcionários
+						
+						System.out.println("Remoção de Funcionário\n");
+						
+						int remover = -1;
+						
+						do {
+							int quantFuncs = funcs.mostrarLista();
+							
+							if(quantFuncs > 0) {
+								int posicao;
+								
+								do {
+									System.out.println("Qual funcionário você quer remover? (Ou insira 0 para cancelar a remoção)");
+									posicao = entrada.nextInt();
+									if(posicao < 0 || posicao > quantFuncs)
+										System.out.println("\nErro: Opção inválida\n");
+								} while(posicao < 0 || posicao > quantFuncs);
+								
+								System.out.println();
+								
+								if(posicao != 0) {
+									Funcionario dadosFunc = funcs.pesquisarFuncionario(posicao);
+									
+									do {
+										System.out.println("Tem certeza de que quer remover o funcionário " + dadosFunc.getNome() + "?");
+										System.out.println("(1) Sim");
+										System.out.println("(0) Cancelar");
+										remover = entrada.nextInt();
+										if(remover < 0 || remover > 1)
+											System.out.println("\nErro: Opção inválida\n");
+									} while(remover < 0 || remover > 1);
+									
+									System.out.println();
+									
+									if(remover == 1) {
+										funcs.remover(posicao);
+										System.out.println("Remoção realizada com sucesso.");
+									} else
+										System.out.println("Remoção cancelada.\n");
+										
+								} else {
+									System.out.println("Remoção cancelada.");
+									remover = -1;
+								}
+							} else {
+								System.out.println("Insira qualquer tecla para voltar:");
+								entrada.nextLine();
+								entrada.nextLine();
+							}
+						} while(remover == 0);
+						
+						System.out.println();
+					}
+				}
+			} else if(sistema == 6) {
+				
+				// Seção "Pagamentos"
+				
+				int escolha = -1;
+				
+				while(escolha != 0) {
+					System.out.println("Pagamentos\n");
+					
+					do {
+						System.out.println("O que você gostaria de fazer?");
+						System.out.println("(1) Realizar pagamento");
+						System.out.println("(2) Consultar histórico de pagamentos");
+						System.out.println("(3) Emitir comprovante de pagamento");
+						System.out.println("(0) Voltar");
+					} while(escolha < 0 || escolha > 3);
+					
+					System.out.println();
+					
+					if(escolha == 1) {
+						
+					}
+				}
+				
 			}
 		}
 		System.out.print("Fim do sistema");

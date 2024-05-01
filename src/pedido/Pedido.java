@@ -43,6 +43,15 @@ public class Pedido {
 		}
 	}
 	
+	public void mostrarProdutos() {
+		Produto aux = inicio;
+		while(aux != null) {
+			System.out.println("- " + aux.getNome() + " (Quantidade: " + aux.getQuantidade() + ") - R$ " + (aux.getPreco() * aux.getQuantidade()));
+			aux = aux.getProx();
+		}
+		System.out.println();
+	}
+	
 	public Produto getInicio() {
 		return inicio;
 	}
