@@ -7,6 +7,8 @@ import pedido.*;
 import mesa.*;
 import produto.*;
 import funcionario.*;
+import pagamento.FilaCaixa;
+import pagamento.ListaPagamentos;
 
 public class Main {
 	public static void main(String[] args) {
@@ -20,6 +22,7 @@ public class Main {
 		ListaMesas mesas = new ListaMesas();
 		ListaProdutos produtos = new ListaProdutos();
 		ListaFuncionarios funcs = new ListaFuncionarios();
+		ListaPagamentos pags = new ListaPagamentos();
 		
 		// Criação de nodos de exemplo
 		
@@ -38,6 +41,7 @@ public class Main {
 		int filaNaoAtendidos = 0;
 		int pessoasAlmocando = 0;
 		int pessoasAtendidas = 0;
+		FilaCaixa filaCaixa = new FilaCaixa();
 		
 		int sistema = 1;
 		
@@ -780,7 +784,24 @@ public class Main {
 											filaNaoAtendidos = filaNaoAtendidos - mesaLiberada.getCadeirasOcupadas();
 										else {
 											pessoasAlmocando = pessoasAlmocando - mesaLiberada.getCadeirasOcupadas();
-											Cliente aux = mesaLiberada.getInicio();
+											
+											Cliente auxCli = mesaLiberada.getInicio();
+											
+											while(auxCli != null) {
+												int cont = 1;
+												Pedido auxPed = pedidos.getInicio();
+												while(auxPed != null) {
+													if(auxCli.getNome() == auxPed.getCliente().getNome() && auxPed.foiEntregue() && !(auxPed.foiPago())) {
+														if(cont == 1) {
+															filaCaixa.entrarNaFila();
+															cont++;
+														}
+														filaCaixa.adicionarPedido(auxPed);
+													}
+													auxPed = auxPed.getProx();
+												}
+												auxCli = auxCli.getProx();
+											}
 										}
 									}
 								}
@@ -1076,14 +1097,149 @@ public class Main {
 						System.out.println("O que você gostaria de fazer?");
 						System.out.println("(1) Realizar pagamento");
 						System.out.println("(2) Consultar histórico de pagamentos");
-						System.out.println("(3) Emitir comprovante de pagamento");
 						System.out.println("(0) Voltar");
-					} while(escolha < 0 || escolha > 3);
+						escolha = entrada.nextInt();
+						if(escolha < 0 || escolha > 2)
+							System.out.println("\nErro: Opção inválida\n");
+					} while(escolha < 0 || escolha > 2);
 					
 					System.out.println();
 					
 					if(escolha == 1) {
 						
+						// Registro de pagamentos realizados pelos clientes
+						
+						System.out.println("Registro de Pagamento\n");
+
+						if(filaCaixa.estaVazia()) {
+							System.out.println("Não há nenhuma pessoa na fila do caixa.\n");
+							System.out.println("Insira qualquer tecla para voltar:");
+							entrada.nextLine();
+							entrada.nextLine();
+						} else {
+							int pagar;
+							
+							do {
+								System.out.println("Há " + filaCaixa.getTamanho() + " pessoa(s) na fila do caixa para pagar. Você vai atender agora?");
+								System.out.println("(1) Sim");
+								System.out.println("(0) Cancelar");
+								pagar = entrada.nextInt();
+								if(pagar < 0 || pagar > 1)
+									System.out.println("\nErro: Opção inválida\n");
+							} while(pagar < 0 || pagar > 1);
+							
+							System.out.println();
+							
+							if(pagar != 0) {
+								filaCaixa.mostrarPedidos();
+								
+								int formaPagamento;
+								
+								do {
+									System.out.println("\nQual será a forma de pagamento?");
+									System.out.println("(1) Dinheiro Físico");
+									System.out.println("(2) Cartão de Débito");
+									System.out.println("(3) Cartão de Crédito");
+									System.out.println("(4) Pix");
+									System.out.println("(5) Vale-refeição");
+									formaPagamento = entrada.nextInt();
+									if(formaPagamento < 1 || formaPagamento > 5)
+										System.out.println("\nErro: Opção inválida");
+								} while(formaPagamento < 1 || formaPagamento > 5);
+								
+								System.out.println();
+								
+								double valorPagar = filaCaixa.getInicio().getValorPagar();
+								double valorPago = 0;
+								
+								if(formaPagamento == 1) {
+									do {
+										System.out.print("Insira a quantia entregue pelo cliente");
+										if(valorPago > 0)
+											System.out.println(" (Quantia atual: R$ " + valorPago + "):");
+										else
+											System.out.println(":");
+										System.out.print("R$ ");
+										valorPago += entrada.nextDouble();
+										if(valorPago < valorPagar) {
+											System.out.println("\nErro: A quantia entregue é menor que R$ " + valorPagar + ".");
+											System.out.println("Adicione mais dinheiro para pagar a conta.\n");
+										}
+									} while(valorPago < valorPagar);
+									
+									System.out.println();
+								} else
+									valorPago = valorPagar;
+								
+								pags.pagarConta(filaCaixa.getInicio().getInicio(), formaPagamento, valorPagar, valorPago);
+								pedidos.pagar(filaCaixa.getInicio().getInicio());
+								filaCaixa.sairDaFila();
+								
+								System.out.println("Pagamento realizado com sucesso.");
+							} else
+								System.out.println("Operação cancelada.");
+						}
+						
+						System.out.println();
+					} else if(escolha == 2) {
+						
+						// Consulta de histórico de pagamentos realizados
+						
+						boolean visualizar = true;
+						
+						do {
+							System.out.println("Histórico de Pagamentos\n");
+							
+							int quantPagamentos = pags.mostrarLista();
+							
+							if(quantPagamentos > 0) {
+								int idPagamento;
+								
+								do {
+									System.out.println("Qual pagamento você quer visualizar? (Ou insira 0 para voltar)");
+									idPagamento = entrada.nextInt();
+									if(idPagamento < 0 || idPagamento > quantPagamentos)
+										System.out.println("\nErro: Opção inválida\n");
+								} while(idPagamento < 0 || idPagamento > quantPagamentos);
+								
+								if(idPagamento != 0) {
+									pags.mostrarPagamento(idPagamento);
+									
+									int emitir;
+									
+									do {
+										System.out.println("Você quer emitir o comprovante de pagamento?");
+										System.out.println("(1) Sim");
+										System.out.println("(0) Cancelar");
+										emitir = entrada.nextInt();
+										if(emitir < 0 || emitir > 1)
+											System.out.println("\nErro: Opção inválida\n");
+									} while(emitir < 0 || emitir > 1);
+									
+									System.out.println();
+									
+									if(emitir == 1) {
+										pags.emitirComprovante(idPagamento);
+										
+										System.out.println("Comprovante emitido com sucesso.\n");
+										
+										System.out.println("Insira qualquer tecla para voltar:");
+										entrada.nextLine();
+										entrada.nextLine();
+									} else
+										System.out.println("Operação cancelada.\n");
+								} else
+									visualizar = false;
+							} else {
+								System.out.println("Insira qualquer tecla para voltar:");
+								entrada.nextLine();
+								entrada.nextLine();
+								
+								visualizar = false;
+							}
+						} while(visualizar);
+						
+						System.out.println();
 					}
 				}
 			} else if(sistema == 7) {
@@ -1099,7 +1255,7 @@ public class Main {
 				System.out.println("Pessoas na fila para almoçar: " + filaAlmocar + " pessoa(s)");
 				System.out.println("Pessoas almoçando: " + pessoasAlmocando + " pessoa(s)");
 				System.out.println("Pessoas atendidas: " + pessoasAtendidas + " pessoa(s)");
-				System.out.println("Pessoas na fila do caixa: " + " pessoa(s)");
+				System.out.println("Pessoas na fila do caixa: " + filaCaixa.getTamanho() + " pessoa(s)");
 				System.out.println("Mesas disponíveis: " + mesas.contarDisponiveis() + " mesa(s)");
 				
 				System.out.println("\nInsira qualquer tecla para voltar");

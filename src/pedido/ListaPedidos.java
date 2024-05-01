@@ -47,7 +47,7 @@ public class ListaPedidos {
 				System.out.print(aux.getId() + ". Pedido " + aux.getId() + " | Mesa " + aux.getIdMesa());
 				if(aux.foiEntregue()) {
 					if(aux.foiPago())
-						System.out.print(" (Pago)");
+						System.out.println(" (Pago)");
 					else
 						System.out.println(" (Entregue) - Não pago");
 				} else
@@ -113,6 +113,19 @@ public class ListaPedidos {
 				return;
 			}
 			aux = aux.getProx();
+		}
+	}
+	
+	public void pagar(Pedido pedidosPagos) {
+		Pedido auxPed = inicio;
+		while(auxPed != null) {
+			Pedido auxPagos = pedidosPagos;
+			while(auxPagos != null) {
+				if(auxPed.getId() == auxPagos.getId())
+					auxPed.setPago(true);
+				auxPagos = auxPagos.getProx();
+			}
+			auxPed = auxPed.getProx();
 		}
 	}
 	

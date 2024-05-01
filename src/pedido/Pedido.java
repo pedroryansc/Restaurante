@@ -56,6 +56,10 @@ public class Pedido {
 		return inicio;
 	}
 	
+	public void setInicio(Produto inicio) {
+		this.inicio = inicio;
+	}
+	
 	public int getId() {
 		return id;
 	}
