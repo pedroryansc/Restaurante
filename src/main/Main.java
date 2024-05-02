@@ -26,6 +26,7 @@ public class Main {
 		
 		// Criação de nodos de exemplo
 		
+		/*
 		clientes.cadastrar("Pedro");
 		clientes.cadastrar("Igor");
 		produtos.cadastrar("Arroz", 7);
@@ -34,6 +35,7 @@ public class Main {
 		produtos.cadastrar("Ovo Frito", 1);
 		produtos.cadastrar("Batata Frita", 4);
 		mesas.cadastrar(2);
+		*/
 		
 		// Inicialização das variáveis de estatísticas
 		
@@ -415,18 +417,98 @@ public class Main {
 						
 						System.out.println("Alteração de Pedido\n");
 						
-						int quantPedidos = pedidos.mostrarNaoEntregues();
+						int atualizar = -1;
 						
-						if(quantPedidos > 0) {
+						do {
+							int quantPedidos = pedidos.mostrarNaoEntregues();
 							
-							// Continuar
-							
-						} else {
-							System.out.println("Insira qualquer tecla para voltar:");
-							entrada.nextLine();
-							entrada.nextLine();
-						}
-						
+							if(quantPedidos <= 0) {
+								System.out.println("Insira qualquer tecla para voltar:");
+								entrada.nextLine();
+								entrada.nextLine();
+							} else {
+								int idPedido;
+								Pedido pedido;
+								boolean foiEntregue = false;
+								
+								do {
+									System.out.println("\nQual pedido você quer atualizar? (Ou insira 0 para voltar)");
+									idPedido = entrada.nextInt();
+									pedido = pedidos.pesquisarPedido(idPedido);
+									if(pedido != null) {
+										if(pedido.foiEntregue())
+											foiEntregue = true;
+										else
+											foiEntregue = false;
+									}
+									if(idPedido < 0 || idPedido > quantPedidos || ((pedido == null || foiEntregue) && idPedido != 0))
+										System.out.println("\nErro: Opção inválida");
+								} while(idPedido < 0 || idPedido > quantPedidos || ((pedido == null || foiEntregue) && idPedido != 0));
+								
+								if(idPedido != 0) {
+									do {
+										System.out.println("\nPedido " + pedido.getId() + " (Mesa " + pedido.getIdMesa() + ")\n");
+										
+										System.out.println("Produtos:");
+										pedido.mostrarProdutos();
+										
+										System.out.println("Cliente: " + pedido.getCliente().getNome());
+										System.out.println("Valor Total: R$ " + pedido.getValorTotal());
+										
+										System.out.println();
+										
+										do {
+											System.out.println("O que você gostaria de fazer?");
+											System.out.println("(1) Adicionar produto");
+											System.out.println("(0) Voltar");
+											atualizar = entrada.nextInt();
+											if(atualizar < 0 || atualizar > 1)
+												System.out.println("\nErro: Opção inválida\n");
+										} while(atualizar < 0 || atualizar > 1);
+										
+										System.out.println();
+										
+										if(atualizar == 1) {
+											int quantProdutos;
+											int idProduto;
+											boolean finalizar = false;
+											
+											while(!(finalizar)) {
+												do {
+													quantProdutos = produtos.mostrarLista();
+													
+													System.out.println("Insira o número do produto para adicioná-lo ao pedido (ou 0 para voltar)");
+													idProduto = entrada.nextInt();
+													if(idProduto < 0 || idProduto > quantProdutos)
+														System.out.println("\nErro: Opção inválida\n");
+													else if(idProduto == 0)
+														finalizar = true;
+												} while(idProduto < 0 || idProduto > quantProdutos);
+												
+												if(idProduto > 0 && idProduto <= quantProdutos) {
+													Produto produto = produtos.pesquisarProduto(idProduto);
+													
+													int quantidade;
+													
+													do {
+														System.out.println("\nQual é a quantidade desejada de " + produto.getNome() + "?");
+														quantidade = entrada.nextInt();
+														if(quantidade <= 0)
+															System.out.println("\nErro: Insira um número maior que 0");
+													} while(quantidade <= 0);
+													
+													pedidos.adicionarProduto(pedido.getId(), produto, quantidade);
+													
+													System.out.println("\n" + quantidade + " unidade(s) de " + produto.getNome() + " adicionada(s) com sucesso.\n");
+												}
+											}
+										}
+									} while(atualizar != 0);
+								} else
+									atualizar = -1;
+							}
+						} while(atualizar == 0);
+												
 						System.out.println();
 					} else if(escolha == 4) {
 						
@@ -1226,6 +1308,8 @@ public class Main {
 										System.out.println("Insira qualquer tecla para voltar:");
 										entrada.nextLine();
 										entrada.nextLine();
+										
+										System.out.println();
 									} else
 										System.out.println("Operação cancelada.\n");
 								} else
